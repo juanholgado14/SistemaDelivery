@@ -1,0 +1,7 @@
+package delivery;
+
+public enum EstadoPedido {
+
+	 CREADO, CONFIRMADO, EN_PREPARACION, LISTO_PARA_RETIRAR,
+	 EN_CAMINO, ENTREGADO, CANCELADO;
+}
