@@ -14,7 +14,7 @@ public class Cliente {
 	
 	public Cliente(String nombre, String mail) {
 		
-		this.nombre = ValidadorTexto.validadorTextoObligatorio(nombre, "nombre");
+		this.nombre = ValidadorTexto.validarTextoObligatorio(nombre, "nombre");
 		
 		this.mail = ValidadorTexto.validarMail(mail, "mail");
 		

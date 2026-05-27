@@ -12,7 +12,7 @@ public class ValidadorTexto {
 		
 	}
 	
-	public static String validadorTextoObligatorio(String texto, String campo) {
+	public static String validarTextoObligatorio(String texto, String campo) {
 		
 		Objects.requireNonNull(texto, "El campo " +  campo + " no puede ser null");
 		
@@ -30,7 +30,7 @@ public class ValidadorTexto {
 		
 		Objects.requireNonNull(mail, "El campo " + campo + " no puede ser null" );
 		
-		String textoNormalizado = validadorTextoObligatorio( mail,  campo).toLowerCase();
+		String textoNormalizado = validarTextoObligatorio( mail,  campo).toLowerCase();
 		
 		if (!MAIL_PATTERN.matcher(textoNormalizado).matches()) {
 			throw new IllegalArgumentException("Mail no valido");
@@ -38,4 +38,6 @@ public class ValidadorTexto {
 		
 		return textoNormalizado;
 	}
+	
+
 }
