@@ -19,6 +19,8 @@ public class Pedido {
 	
 	private final Cliente cliente;
 	
+	private Repartidor repartidor;
+	
 	private EstadoPedido estado;
 	
 	private final LocalDate fechaInicio;
@@ -31,6 +33,7 @@ public class Pedido {
 		
 		this.cliente = Objects.requireNonNull(cliente, "El cliente no puede ser null");
 	 	this.restaurante = Objects.requireNonNull(restaurante, "El restaurante no puede ser null");
+	 	
 		Objects.requireNonNull(clock, "El clock no puede ser null");
 		
 		this.fechaInicio = LocalDate.now(clock);
@@ -44,6 +47,12 @@ public class Pedido {
 
 	public int getId() {
 		return id;
+	}
+
+	
+	
+	public Repartidor getRepartidor() {
+		return repartidor;
 	}
 
 	public Restaurante getRestaurante() {
@@ -72,33 +81,70 @@ public class Pedido {
 	
 	public void confirmar(Clock clock) {
 		
-		exigirEstado(EstadoPedido.CREADO, "Confirmado");
+		
+		exigirEstado(EstadoPedido.CREADO, "confirmar");
+		
+		if (items.isEmpty()) {
+			throw new IllegalStateException("El pedido no puede estar vacio");
+		}
+		
 		transicionarA(EstadoPedido.CONFIRMADO, TipoEventoPedido.CONFIRMADO, clock);
+		
 		
 	}
 	
 	public void enPreparacion(Clock clock) {
 		
-		exigirEstado(EstadoPedido.CONFIRMADO, "En preparacion");
+		exigirEstado(EstadoPedido.CONFIRMADO, "en preparacion");
 		transicionarA(EstadoPedido.EN_PREPARACION, TipoEventoPedido.EN_PREPARACION, clock);
 	}
+	
 	
 	public void listoParaRetirar(Clock clock) {
 		
 		
-		exigirEstado(EstadoPedido.EN_PREPARACION, "Listo para retirar");
+		exigirEstado(EstadoPedido.EN_PREPARACION, "listo para retirar");
 		transicionarA(EstadoPedido.LISTO_PARA_RETIRAR, TipoEventoPedido.LISTO_PARA_RETIRAR, clock);
+		
+	}
+	
+	public void asignarRepartidor(Repartidor nuevoRepartidor, Clock clock) {
+		
+		Objects.requireNonNull(nuevoRepartidor, "El repartidor no puede ser null");
+		Objects.requireNonNull(clock, "El clock no puede ser null");
+		exigirEstado( EstadoPedido.LISTO_PARA_RETIRAR, "asignar repartidor");
+
+		if (this.repartidor != null) {
+			
+			throw new IllegalStateException("El pedido ya tiene repartidor asignado");
+		}
+		
+		this.repartidor = nuevoRepartidor;
+		
+		
+		
+		LocalDate fecha = LocalDate.now(clock);
+		
+		historial.add(EventoPedido.de(fecha, TipoEventoPedido.ASIGNADO_REPARTIDOR));
 	}
 	
 	public void enCamino(Clock clock) {
 		
-		exigirEstado(EstadoPedido.LISTO_PARA_RETIRAR, "En camino");
+		exigirRepartidor();
+		exigirEstado( EstadoPedido.LISTO_PARA_RETIRAR, "en camino");
 		transicionarA(EstadoPedido.EN_CAMINO, TipoEventoPedido.EN_CAMINO, clock);
+	}
+	
+	private void exigirRepartidor() {
+		
+		if (repartidor == null) {
+			throw new IllegalStateException("No hay repartidor asignado");
+		}
 	}
 	
 	public void entregado(Clock clock) {
 		
-		exigirEstado(EstadoPedido.EN_CAMINO, "Entregado");
+		exigirEstado(EstadoPedido.EN_CAMINO, "entregado");
 		transicionarA(EstadoPedido.ENTREGADO, TipoEventoPedido.ENTREGADO, clock);
 		
 	}
@@ -118,8 +164,8 @@ public class Pedido {
 		Objects.requireNonNull(permitidos, "Permitidos no puede ser null");
 		
 		if (!permitidos.contains(estado)) {
-			throw new IllegalStateException("El pedido no esta en un estado permitido "
-					+ "ya esta en estado: " + estado + "." + "Estados permitidos: " +
+			throw new IllegalStateException("No se puede " + accion +
+					 ". Estado actual: " + estado + "." + " Estados permitidos: " +
 					estadosPermitidos(permitidos));
 		}
 		
@@ -157,10 +203,34 @@ public class Pedido {
 		historial.add(EventoPedido.de(ahora, tipo));
 	}
 	
-	private boolean esTerminal(EstadoPedido nuevoEstado) {
+	private boolean esTerminal(EstadoPedido estado) {
 		
-		return nuevoEstado == EstadoPedido.CANCELADO || 
-				nuevoEstado == EstadoPedido.ENTREGADO;
+		return estado == EstadoPedido.CANCELADO || 
+				estado == EstadoPedido.ENTREGADO;
+	}
+	
+
+	public void agregarItem(Producto producto,int cantidad) {
+		
+		Objects.requireNonNull(producto, "El producto no puede ser null");
+		
+		exigirEstado(EstadoPedido.CREADO, "agregar item");
+		
+		ItemPedido item = new ItemPedido(producto, cantidad);
+		
+		items.add(item);
+	}
+	
+	public double calcularTotal() {
+		
+		double total = 0;
+		
+		for (ItemPedido item: items) {
+			
+			total += item.calcularSubtotal();
+		}
+		
+		return total;
 	}
 	
 	@Override
@@ -168,7 +238,7 @@ public class Pedido {
 		
 		return "Id: " + id +
 				"\nCliente: " + cliente.getNombre() + 
-				"\nRestaurante" + restaurante.getNombre() + 
+				"\nRestaurante: " + restaurante.getNombre() + 
 				"\nEstado: " + estado + 
 				"\nFecha: " + fechaInicio;
 }
