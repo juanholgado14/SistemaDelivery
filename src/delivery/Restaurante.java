@@ -39,24 +39,46 @@ public class Restaurante {
 	}
 
 	public Map<Integer, Producto> getMenu() {
-		return Map.copyOf(menu);
+		return new LinkedHashMap<>(menu);
 	}
 
 	public void agregarProducto(Producto producto) {
 		
 		Objects.requireNonNull(producto, "El producto no puede ser null");
 		
-		if (menu.containsKey(producto.getId()) ) {
-			throw new IllegalArgumentException("El menu ya contiene ese producto " + producto.getNombre());
-		}
+		exigirNombreProductoDisponible(producto.getNombre());
 		
 		menu.put(producto.getId(), producto);
 	}
+	
+	private void exigirNombreProductoDisponible(String nombre) {
+		
+		for (Producto producto: menu.values()) {
+			
+			if (producto.getNombre().equalsIgnoreCase(nombre)) {
+				throw new IllegalArgumentException("Ya existe un producto "
+						+ "con ese nombre en este restaurante");
+			}
+		}
+	}
+	
+	public Producto buscarProductoPorId(int idProducto) {
+		
+		Producto producto = menu.get(idProducto);
+		
+		if (producto == null) {
+			throw new IllegalStateException("No existe el producto con ese id: " + 
+		idProducto);
+		}
+		
+		return producto;
+	}
+
 	
 	@Override
 	public String toString() {
 		return "ID: "+ id + 
 				"\nNombre: " + nombre+ 
-				"\nDireccion:" + direccion;
+				"\nDireccion: " + direccion;
 	}
 }

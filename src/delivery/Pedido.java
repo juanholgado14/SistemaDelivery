@@ -213,12 +213,16 @@ public class Pedido {
 	public void agregarItem(Producto producto,int cantidad) {
 		
 		Objects.requireNonNull(producto, "El producto no puede ser null");
-		
-		exigirEstado(EstadoPedido.CREADO, "agregar item");
+				
+		exigirQuePermitaAgregarItems();
 		
 		ItemPedido item = new ItemPedido(producto, cantidad);
 		
 		items.add(item);
+	}
+	
+	public void exigirQuePermitaAgregarItems() {
+	    exigirEstado(EstadoPedido.CREADO, "agregar item");
 	}
 	
 	public double calcularTotal() {

@@ -58,6 +58,22 @@ public class Producto {
 		return stock;
 	}
 
+	public void exigirStockSuficiente(int cantidad) {
+		
+		if (cantidad<=0) {
+			throw new IllegalArgumentException("No se puede cargar cantidades "
+					+ "iguales o menores a cero");
+		}
+		 if (stock<cantidad) {
+			 throw new IllegalArgumentException("No hay suficiente stock para este "
+			 		+ "pedido. Stock actual: " + stock);
+		 }
+	}
+	
+	void descontarStock(int cantidad) {
+	    stock -= cantidad;
+	}
+	
 	@Override
 	public String toString() {
 		return id +	"\nNombre: " + nombre + 
