@@ -3,6 +3,7 @@ package delivery;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
@@ -75,9 +76,6 @@ public class Pedido {
 		return cliente;
 	}
 
-	public List<ItemPedido> getItems() {
-		return List.copyOf(items);
-	}
 	
 	public void confirmar(Clock clock) {
 		
@@ -235,6 +233,11 @@ public class Pedido {
 		}
 		
 		return total;
+	}
+	
+	public Collection<ItemPedido> obtenerItems() {
+		
+		return new ArrayList<>(items); 
 	}
 	
 	@Override

@@ -1,5 +1,7 @@
 package delivery;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -38,9 +40,6 @@ public class Restaurante {
 		return direccion;
 	}
 
-	public Map<Integer, Producto> getMenu() {
-		return new LinkedHashMap<>(menu);
-	}
 
 	public void agregarProducto(Producto producto) {
 		
@@ -74,6 +73,9 @@ public class Restaurante {
 		return producto;
 	}
 
+	public Collection<Producto> obtenerProductos(){
+		return new ArrayList<>( menu.values());
+	}
 	
 	@Override
 	public String toString() {
